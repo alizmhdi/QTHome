@@ -409,40 +409,9 @@ Window {
         }
     }
 
-    // Function to send data to the server
-    function sendDataToServer() {
-        // Create a new XMLHttpRequest
-        var xhr = new XMLHttpRequest();
-        var url = "http://localhost:8080";  // Replace with your server URL
-        xhr.open("POST", url);
-        xhr.setRequestHeader("Content-Type", "application/json");
 
-        // Prepare data to send
-        var data = {
-            "lightSensor": lightSensor,
-            "temperatureSensor": temperatureSensor,
-            "motionSensor": motionSensor,
-            "lampState": lampState ? "On" : "Off",
-            "curtainState": curtainState ? "Open" : "Closed",
-            "coolerState": coolerState
-        };
 
-        // Send the request with JSON data
-        xhr.send(JSON.stringify(data));
-
-        // Handle the response
-        xhr.onreadystatechange = function() {
-            if (xhr.readyState === XMLHttpRequest.DONE) {
-                if (xhr.status === 200) {
-                    console.log("POST request successful: " + xhr.responseText);
-                } else {
-                    console.log("Error in POST request: " + xhr.status);
-                }
-            }
-        };
-    }
-}
-
+// here we create a Websocket that triggers with  a message from server and updates status
 
 WebSocket {
     id: webSocket
@@ -459,6 +428,8 @@ WebSocket {
     }
 }
 
+// this function will update the parameters
+
 function updateUIWithData(data) {
     // Use the data to update QML properties or UI elements
     lightSensor = data.lightSensor;
@@ -468,3 +439,47 @@ function updateUIWithData(data) {
     curtainState = data.curtainState === "Open";
     coolerState = data.coolerState;
 }
+
+// this function is for sending data to server 
+
+function sendDataToServer() {
+    if (websocket.readyState === WebSocket.OPEN) {
+        // Prepare data to send
+        var data = {
+            "lightSensor": lightSensor,
+            "temperatureSensor": temperatureSensor,
+            "motionSensor": motionSensor,
+            "lampState": lampState ? "ON" : "OFF",
+            "curtainState": curtainState ? "open" : "close",
+            "coolerState": coolerState
+        };
+
+        // Send the JSON data as a string over WebSocket
+        websocket.send(JSON.stringify(data));
+
+        console.log("Data sent to server:", data);
+    } else {
+        console.log("WebSocket is not open. Cannot send data.");
+    }
+}
+
+// set websocket
+
+var websocket = new WebSocket("ws://localhost:8000/ws/data/");
+
+websocket.onopen = function() {
+    console.log("connection established");
+};
+
+websocket.onmessage = function(event) {
+    console.log("received from server:", event.data);
+};
+
+websocket.onclose = function() {
+    console.log("connection closed");
+};
+
+websocket.onerror = function(error) {
+    console.error("error:", error);
+};
+
