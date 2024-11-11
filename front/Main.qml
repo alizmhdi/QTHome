@@ -409,13 +409,47 @@ Window {
         }
     }
 
+//fucntion for update server only (not realtime and not bidirectional)
+
+function sendDataToServer() {
+        // Create a new XMLHttpRequest
+        var xhr = new XMLHttpRequest();
+        var url = "http://localhost:8080";  // Replace with your server URL
+        xhr.open("POST", url);
+        xhr.setRequestHeader("Content-Type", "application/json");
+
+        // Prepare data to send
+        var data = {
+            "lightSensor": lightSensor,
+            "temperatureSensor": temperatureSensor,
+            "motionSensor": motionSensor,
+            "lampState": lampState ? "On" : "Off",
+            "curtainState": curtainState ? "Open" : "Closed",
+            "coolerState": coolerState
+        };
+
+        // Send the request with JSON data
+        xhr.send(JSON.stringify(data));
+
+        // Handle the response
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+                if (xhr.status === 200) {
+                    console.log("POST request successful: " + xhr.responseText);
+                } else {
+                    console.log("Error in POST request: " + xhr.status);
+                }
+            }
+        };
+    }
+}
 
 
-// here we create a Websocket that triggers with  a message from server and updates status
+// here we create a Websocket that triggers with  a message from server and updates status (realtime and bidirectional)
 
 WebSocket {
     id: webSocket
-    url: "ws://localhost:8000/ws/data/"  // Replace with your server’s address
+    url: "ws://localhost:8000/ws/data/" 
     onStatusChanged: {
         if (status === WebSocket.Open) {
             console.log("Connected to WebSocket server");
@@ -424,7 +458,7 @@ WebSocket {
 
     onMessageReceived: function(message) {
         var data = JSON.parse(message.data);
-        updateUIWithData(data);  // Update your QML UI with the received data
+        updateUIWithData(data);  /
     }
 }
 
