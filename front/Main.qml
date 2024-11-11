@@ -4,6 +4,8 @@ import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
 import QtQuick.Controls.Basic
 
+import QtWebSockets 1.0
+
 Window {
     visible: true
     width: 800
@@ -439,4 +441,30 @@ Window {
             }
         };
     }
+}
+
+
+WebSocket {
+    id: webSocket
+    url: "ws://localhost:8000/ws/data/"  // Replace with your server’s address
+    onStatusChanged: {
+        if (status === WebSocket.Open) {
+            console.log("Connected to WebSocket server");
+        }
+    }
+
+    onMessageReceived: function(message) {
+        var data = JSON.parse(message.data);
+        updateUIWithData(data);  // Update your QML UI with the received data
+    }
+}
+
+function updateUIWithData(data) {
+    // Use the data to update QML properties or UI elements
+    lightSensor = data.lightSensor;
+    temperatureSensor = data.temperatureSensor;
+    motionSensor = data.motionSensor;
+    lampState = data.lampState === "On";
+    curtainState = data.curtainState === "Open";
+    coolerState = data.coolerState;
 }
