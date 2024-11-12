@@ -42,6 +42,18 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 ]
 
+# for running redis :
+# docker run --name redis -p 6379:6379 -d redis
+# for testing the redis connection :
+# docker exec -it redis redis-cli ping
+
+#for channel :
+# pip install django channels channels-redis
+
+# to run the channel :
+# pip install dap
+# daphne -b 0.0.0.0 -p 8000 myproject.asgi:application
+
 ASGI_APPLICATION = 'server.asgi.application'
 CHANNEL_LAYERS = {
     "default": {
