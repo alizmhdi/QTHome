@@ -6,4 +6,5 @@ def hello():
         message = websocket.recv()
         print(f"Received: {message}")
 
-hello()
+if __name__ == "__main__":
+    hello()
