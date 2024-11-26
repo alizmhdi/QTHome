@@ -14,7 +14,7 @@ application = ProtocolTypeRouter({
     "websocket": AuthMiddlewareStack(
         URLRouter(
             [
-                path('ws/data/', QTConsumer.as_asgi()),
+                path('ws/data', QTConsumer.as_asgi()),
             ]
         )
     ),
