@@ -3,6 +3,8 @@ import QtQuick.Window 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
 import QtQuick.Controls.Basic
+import QtWebSockets 1.0
+
 
 Window {
     visible: true
@@ -20,6 +22,40 @@ Window {
     property bool lampState: false
     property bool curtainState: false
     property string coolerState: "Off"
+
+    WebSocket {
+        id: websocket
+        url: "ws://localhost:8000/ws/data"
+        active: true
+
+        onStatusChanged: {
+            if (status === WebSocket.Open) {
+                console.log("WebSocket connection opened")
+            } else if (status === WebSocket.Closing || status === WebSocket.Closed) {
+                console.log("WebSocket connection closed")
+            }
+        }
+
+        onTextMessageReceived: function(message) {
+            console.log("Message received: " + message)
+            processIncomingMessage(message)
+        }
+    }
+
+    function processIncomingMessage(message) {
+        var data = JSON.parse(message)
+
+        if (data.hasOwnProperty("lampState")) {
+            lampState = data.lampState === "On"
+        }
+        if (data.hasOwnProperty("curtainState")) {
+            curtainState = data.curtainState === "Open"
+        }
+        if (data.hasOwnProperty("coolerState")) {
+            coolerState = data.coolerState
+        }
+    }
+
 
     ColumnLayout {
         anchors.fill: parent
