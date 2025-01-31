@@ -1,0 +1,15 @@
+{% extends "admin/change_list.html" %}
+{% load static %}
+
+{% block content %}
+    {{ block.super }}
+    <div class="button-group">
+        <button class="action-button" data-action="enable_lamp">Enable Lamp</button>
+        <button class="action-button" data-action="disable_lamp">Disable Lamp</button>
+        <button class="action-button" data-action="enable_cooler">Enable Cooler</button>
+        <button class="action-button" data-action="disable_cooler">Disable Cooler</button>
+        <button class="action-button" data-action="open_curtain">Open Curtain</button>
+        <button class="action-button" data-action="close_curtain">Close Curtain</button>
+    </div>
+    <script src="{% static 'js/admin-actions.js' %}"></script>
+{% endblock %}

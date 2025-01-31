@@ -1,0 +1,560 @@
+{% load static %}
+<style>
+    /* General Styling */
+    body {
+        background-color: #121212;
+        /* Dark background */
+        margin: 0;
+        font-family: Arial, sans-serif;
+        color: #FFFFFF;
+        padding: 150px;
+    }
+
+    .cooler-block {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex-wrap: nowrap;
+    align-content: space-around;
+    justify-content: center;
+    align-items: baseline;
+}
+
+
+    .column {
+        display: flex;
+        flex-direction: column;
+        flex-wrap: nowrap;
+        align-content: space-around;
+        justify-content: space-evenly;
+        align-items: stretch;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background-color: #1e1e1e;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        display: flex;
+        flex-direction: row-reverse;
+        flex-wrap: nowrap;
+        align-content: stretch;
+        justify-content: space-around;
+        align-items: flex-start;
+    }
+
+    .column-layout,
+    .row-layout {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    /* Header Styling */
+    .header {
+        background-color: #1F1F1F;
+        border-radius: 10px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #FFFFFF;
+        font-size: 24px;
+        font-weight: bold;
+    }
+
+    .sensor-block {
+        background-color: #000000;
+        border: 22px solid #222121;
+        border-radius: 0px;
+        padding: 15px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        align-content: space-around;
+        flex-wrap: wrap;
+        justify-content: center;
+        flex-direction: row;
+    }
+
+    .sensor-block .indicator {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        transition: opacity 0.5s ease-in-out;
+    }
+
+    /* Sensor Text Styling */
+    .sensor-block .text-container {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .sensor-block .text-container .title {
+        font-size: 20px;
+        font-weight: bold;
+        color: #FFFFFF;
+    }
+
+    .sensor-block .text-container .value {
+        font-size: 18px;
+        color: #CCCCCC;
+    }
+
+    /* Temperature Gauge */
+    .temperature-gauge {
+        width: 30px;
+        height: 70px;
+        background-color: #333333;
+        border-radius: 5px;
+        position: relative;
+    }
+
+    .temperature-gauge .fill {
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        background-color: #F44336;
+        border-radius: 5px;
+        transition: height 0.5s ease-in-out;
+    }
+
+    /* Motion Indicator Pulsing */
+    .motion-indicator {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        background-color: #555555;
+        animation: pulse 1s infinite ease-in-out;
+    }
+
+    .motion-indicator.detected {
+        background-color: #4CAF50;
+        animation: pulse 1s infinite ease-in-out;
+    }
+
+    /* Keyframes for pulsing effect */
+    @keyframes pulse {
+
+        0%,
+        100% {
+            transform: scale(1.0);
+        }
+
+        50% {
+            transform: scale(1.2);
+        }
+    }
+
+    /* Actuator Blocks */
+    .actuator-block {
+        background-color: #1E1E1E;
+        border: 1px solid #333333;
+        border-radius: 10px;
+        padding: 15px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .actuator-block .indicator {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+    }
+
+    .actuator-block .lamp-indicator {
+        background-color: #FFD54F;
+    }
+
+    .actuator-block .curtain-indicator {
+        background-color: #8BC34A;
+    }
+
+    .actuator-block .off-indicator {
+        background-color: #555555;
+    }
+
+    /* Swamp Cooler */
+    .cooler-block {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .cooler-block .icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 25px;
+        background-color: #2196F3;
+    }
+
+    .cooler-block .dropdown {
+        background-color: #2E2E2E;
+        border: 1px solid #444444;
+        border-radius: 5px;
+        padding: 10px;
+        color: #FFFFFF;
+    }
+
+    /* Button Styling */
+    button {
+        margin: 2px;
+        width: 300px;
+        height: 50px;
+        font-size: 18px;
+        font-weight: bold;
+        border: none;
+        border-radius: 25px;
+        background-color: #6200EE;
+        color: #FFFFFF;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+        background-color: #3700B3;
+    }
+
+    .row-layout {
+        display: flex;
+        /* Enables flexbox layout */
+        justify-content: space-between;
+        /* Adjusts spacing between items */
+        /*align-items: center; /* Aligns items vertically */
+        gap: 10px;
+        /* Adds spacing between boxes (optional) */
+    }
+</style>
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Virtual Sensors and Actuators</title>
+    <link rel="stylesheet" href="../static/css/styles.css">
+</head>
+
+<body>
+    <div class="container">
+
+        <div class="column">
+            <div class="row">
+                <div class="card header">
+                    <h2>Sensors</h2>
+                </div>
+            </div>
+            <!-- Light Sensor Display -->
+            <div class="sensor-block">
+                <div class="row">
+                    <div class="indicator light-indicator" id="light-indicator"></div>
+                    <div class="column">
+                        <h3 class="title">Light Sensor</h3>
+                        <p id="light-sensor-value">Very Dark</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Temperature Sensor Display -->
+            <div class="sensor-block">
+                <div class="row">
+                    <div class="gauge" id="temperature-gauge">
+                        <div class="fill" id="temperature-fill"></div>
+                    </div>
+                    <div class="column">
+                        <h3>Temperature Sensor</h3>
+                        <p id="temperature-sensor-value">0 °C</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Motion Sensor Display -->
+            <div class="sensor-block">
+                <div class="row">
+                    <div class="indicator motion-indicator" id="motion-indicator"></div>
+                    <div class="column">
+                        <h3>Motion Sensor</h3>
+                        <p id="motion-sensor-value">Not Detected</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="column">
+            <div class="row">
+                <div class="card header row">
+                    <h2>Actuators</h2>
+                </div>
+            </div>
+
+            <!-- Lamp Actuator -->
+            <div class="sensor-block box">
+                <div class="row">
+                    <div class="indicator lamp-indicator" id="lamp-indicator"></div>
+                    <h3>Lamp</h3>
+                    <div class="spacer"> <button class="action-button" data-action="enable_lamp">Enable Lamp</button>
+                        <button class="action-button" data-action="disable_lamp">Disable Lamp</button>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Curtain Actuator -->
+            <div class="sensor-block box">
+                <div class="row">
+                    <div class="indicator curtain-indicator" id="curtain-indicator"></div>
+                    <h3>Electric Curtain</h3>
+                    <div class="spacer"> <button class="action-button" data-action="open_curtain">Open Curtain</button>
+                        <button class="action-button" data-action="close_curtain">Close Curtain</button>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Cooler Actuator
+                <div class="sensor-block cooler-block box">
+                    <div class="row">
+                        <div class="indicator cooler-indicator" id="cooler-indicator"></div>
+                        <h3>Swamp Cooler</h3>
+                        <div class="spacer"></div>
+                        <select class="action-select" id="cooler-state">
+                            <option value="Off">Off</option>
+                            <option value="Low Speed">Low Speed</option>
+                            <option value="Medium Speed">Medium Speed</option>
+                            <option value="High Speed">High Speed</option>
+                        </select>
+                    </div>
+                </div> -->
+            <!-- Cooler Actuator -->
+            <div class="row">
+                <div class="sensor-block cooler-block box">
+
+                    <div class="indicator cooler-indicator" id="cooler-indicator"></div>
+                    <h3>Swamp Cooler</h3>
+                    <div class="spacer"></div>
+                    <input type="range" class="action-select" id="cooler-state" min="0" max="3" step="1" value="0">
+                    <div id="cooler-state-label">Off</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('cooler-state').addEventListener('input', function () {
+            var value = this.value;
+            var label = '';
+
+            switch (value) {
+                case '0':
+                    label = 'Off';
+                    break;
+                case '1':
+                    label = 'Low Speed';
+                    break;
+                case '2':
+                    label = 'Medium Speed';
+                    break;
+                case '3':
+                    label = 'High Speed';
+                    break;
+            }
+
+            document.getElementById('cooler-state-label').textContent = label;
+            // You can also update other indicators as needed
+            document.getElementById('cooler-indicator').className = 'indicator cooler-indicator ' + label.toLowerCase().replace(' ', '-');
+        });
+    </script>
+
+    </div>
+
+    </div>
+
+    <script src="{% static 'js/admin-actions.js' %}"></script>
+    <script>
+        // WebSocket setup for real-time data updates
+        const socket = new WebSocket('ws://localhost:8000/ws/data');
+
+        socket.onmessage = function (event) {
+            const data = JSON.parse(event.data);
+
+            updateIndicators(data);
+
+            // Update sensors
+            if (data.lightSensor !== undefined) {
+                document.getElementById('light-sensor-value').textContent = data.lightSensor;
+                document.getElementById('light-indicator').style.opacity = getLightOpacity(data.lightSensor);
+            }
+            if (data.temperatureSensor !== undefined) {
+                document.getElementById('temperature-sensor-value').textContent = data.temperatureSensor + " °C";
+                document.getElementById('temperature-fill').style.height = (data.temperatureSensor / 30 * 100) + '%';
+            }
+            if (data.motionSensor !== undefined) {
+                document.getElementById('motion-sensor-value').textContent = data.motionSensor;
+                document.getElementById('motion-indicator').style.backgroundColor = data.motionSensor === 'Detected' ? '#4CAF50' : '#555555';
+            }
+        };
+
+        socket.onopen = function () {
+            console.log("WebSocket connection opened");
+        };
+
+        socket.onclose = function () {
+            console.log("WebSocket connection closed");
+        };
+
+        function getLightOpacity(lightSensor) {
+            switch (lightSensor) {
+                case 'Very Dark':
+                    return 0.2;
+                case 'Dark':
+                    return 0.4;
+                case 'Normal':
+                    return 0.6;
+                case 'Bright':
+                    return 0.8;
+                case 'Very Bright':
+                    return 1.0;
+                default:
+                    return 0.5;
+            }
+        }
+
+        function updateIndicators(data) {
+            if (data.lampState !== undefined) {
+                document.getElementById('lamp-indicator').style.backgroundColor = data.lampState === 'On' ? '#FFD54F' : '#555555';
+            }
+            if (data.curtainState !== undefined) {
+                document.getElementById('curtain-indicator').style.backgroundColor = data.curtainState === 'Open' ? '#8BC34A' : '#555555';
+            }
+            if (data.coolerState !== undefined) {
+                document.getElementById('cooler-indicator').style.backgroundColor = data.coolerState === 'High Speed' ? '#2196F3' : '#555555';
+                document.getElementById('cooler-state').value = data.coolerState;
+            }
+        }
+
+        // Handle button clicks to send data to server
+        document.querySelectorAll('.action-button').forEach(button => {
+            button.addEventListener('click', function () {
+                const action = this.dataset.action;
+                const data = {};
+
+                switch (action) {
+                    case 'enable_lamp':
+                        data.lampState = 'On';
+                        break;
+                    case 'disable_lamp':
+                        data.lampState = 'Off';
+                        break;
+                    case 'open_curtain':
+                        data.curtainState = 'Open';
+                        break;
+                    case 'close_curtain':
+                        data.curtainState = 'Close';
+                        break;
+                    case 'enable_cooler':
+                        data.coolerState = 'High Speed';
+                        break;
+                    case 'disable_cooler':
+                        data.coolerState = 'Off';
+                        break;
+                }
+
+                fetch('/perform-action/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify(data)
+                }).then(response => response.json()).then(data => {
+                    alert(data.message);
+                });
+            });
+        });
+
+        // Handle select change to send data to server
+        document.getElementById('cooler-state').addEventListener('change', function () {
+            const data = {
+                coolerState: this.value
+            };
+
+            fetch('/perform-action/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify(data)
+            }).then(response => response.json()).then(data => {
+                alert(data.message);
+            });
+        });
+
+        function getCookie(name) {
+            var cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                var cookies = document.cookie.split(';');
+                for (var i = 0; i < cookies.length; i++) {
+                    var cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        // Fetch sensor data every 10 seconds to update the UI
+        setInterval(fetchSensorData, 1000);
+
+        function fetchSensorData() {
+            fetch('/get-sensor-data/')
+                .then(response => response.json())
+                .then(data => {
+                    // Update light sensor
+                    if (data.lightSensor !== undefined) {
+                        document.getElementById('light-sensor-value').textContent = data.lightSensor;
+                        document.getElementById('light-indicator').style.opacity = getLightOpacity(data.lightSensor);
+                    }
+                    // Update temperature sensor
+                    if (data.temperatureSensor !== undefined) {
+                        document.getElementById('temperature-sensor-value').textContent = data.temperatureSensor + " °C";
+                        document.getElementById('temperature-fill').style.height = (data.temperatureSensor / 30 * 100) + '%';
+                    }
+                    // Update motion sensor
+                    if (data.motionSensor !== undefined) {
+                        document.getElementById('motion-sensor-value').textContent = data.motionSensor;
+                        document.getElementById('motion-indicator').style.backgroundColor = data.motionSensor === 'Detected' ? '#4CAF50' : '#555555';
+                    }
+                    // Update lamp state
+                    if (data.lampState !== undefined) {
+                        document.getElementById('lamp-indicator').style.backgroundColor = data.lampState === 'On' ? '#FFD54F' : '#555555';
+                    }
+                    // Update curtain state
+                    if (data.curtainState !== undefined) {
+                        document.getElementById('curtain-indicator').style.backgroundColor = data.curtainState === 'Open' ? '#8BC34A' : '#555555';
+                    }
+                    // Update cooler state
+                    if (data.coolerState !== undefined) {
+                        document.getElementById('cooler-indicator').style.backgroundColor = data.coolerState === 'High Speed' ? '#2196F3' : '#555555';
+                        document.getElementById('cooler-state').value = data.coolerState;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching sensor data:', error);
+                });
+        }
+
+
+    </script>
+</body>
+
+</html>

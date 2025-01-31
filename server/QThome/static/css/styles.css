@@ -1,0 +1,23 @@
+/* Dark background for the window */
+body {
+    background-color: #121212;
+    color: white;
+    font-family: Arial, sans-serif;
+    padding: 20px;
+}
+
+.centered-heading {
+    border: 2px solid #000; /* Black border */
+    padding: 20px; /* Space inside the border */
+    text-align: center; /* Center text inside the element */
+    background-color: #fff; /* Optional background for the heading */
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2); /* Optional shadow for styling */
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background-color: #1e1e1e;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
