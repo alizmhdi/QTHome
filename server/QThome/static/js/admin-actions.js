@@ -4,8 +4,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     socket.onmessage = function(event) {
         const data = JSON.parse(event.data);
-        updateIndicators(data);
-
+        updateIndicators(data);        
         // Update sensors
         if (data.lightSensor !== undefined) {
             document.getElementById('light-sensor-value').textContent = data.lightSensor;
@@ -54,4 +53,7 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('curtain-indicator').style.backgroundColor = data.curtainState === 'Open' ? '#8BC34A' : '#555555';
         }
         if (data.coolerState !== undefined) {
-            document.getElementById('cooler-indicator').style.backgroundColor = data.cool
+            document.getElementById('cooler-indicator').style.backgroundColor = data.coolerState;
+        }
+    }
+});

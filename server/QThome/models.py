@@ -4,8 +4,11 @@ from django.db import models
 
 class Data(models.Model):
     LIGHT_CHOICES = [
+        ('very_dark', 'Very Dark'),
         ('dark', 'Dark'),
-        ('light', 'Light'),
+        ('medium', 'Medium'),
+        ('bright', 'Bright'),
+        ('very_bright', 'Very Bright')
     ]
 
     MOTION_CHOICES = [
@@ -20,19 +23,20 @@ class Data(models.Model):
 
     CURTAIN_CHOICES = [
         ('open', 'Open'),
-        ('close', 'Close'),
+        ('closed', 'Closed'),
     ]
 
     COOLER_CHOICES = [
-        ('high', 'High'),
-        ('medium', 'Medium'),
-        ('low', 'Low'),
+        ("off", "Off"),
+        ("low_speed", "Low Speed"),
+        ("medium_speed", "Medium Speed"),
+        ("high_speed", "High Speed")
     ]
 
-    lightSensor = models.CharField(max_length=5, choices=LIGHT_CHOICES)
+    lightSensor = models.CharField(max_length=13, choices=LIGHT_CHOICES)
     temperatureSensor = models.FloatField()
-    motionSensor = models.CharField(max_length=12, choices=MOTION_CHOICES)
-    lampState = models.CharField(max_length=3, choices=LAMP_CHOICES)
-    curtainState = models.CharField(max_length=5, choices=CURTAIN_CHOICES)
-    coolerState = models.CharField(max_length=6, choices=COOLER_CHOICES)
+    motionSensor = models.CharField(max_length=13, choices=MOTION_CHOICES)
+    lampState = models.CharField(max_length=13, choices=LAMP_CHOICES)
+    curtainState = models.CharField(max_length=13, choices=CURTAIN_CHOICES)
+    coolerState = models.CharField(max_length=13, choices=COOLER_CHOICES)
     created_at = models.DateTimeField(auto_now_add=True)

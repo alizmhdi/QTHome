@@ -10,6 +10,11 @@ from .serializers import DataSerializer
 class DataViewSet(viewsets.ModelViewSet):
      queryset = Data.objects.all() 
      serializer_class = DataSerializer
+     
+     def create(self, request):
+        data = request.data
+        Data.objects.create(**data)
+        return JsonResponse({"status": "success", "message": "Data created successfully."})
 
 def custom_actions_view(request):
     return render(request, 'custom_actions.html')
@@ -17,10 +22,11 @@ def custom_actions_view(request):
 def perform_action(request):
     if request.method == "POST":
         data = json.loads(request.body.decode('utf-8'))
+        print(data)
         channel_layer = get_channel_layer()
 
         # Ensure to update or create the object based on the given id
-        Data.objects.update_or_create(id=1, defaults=data)
+        Data.objects.update_or_create(**data)
 
         if 'lampState' in data:
             async_to_sync(channel_layer.group_send)("QT", {'type': 'send_message', 'lampState': data['lampState']})
@@ -29,12 +35,12 @@ def perform_action(request):
         if 'coolerState' in data:
             async_to_sync(channel_layer.group_send)("QT", {'type': 'send_message', 'coolerState': data['coolerState']})
 
-        if 'lightSensor' in data:
-            Data.objects.update_or_create(id=1, defaults={'lightSensor': data['lightSensor']})
-        if 'temperatureSensor' in data:
-            Data.objects.update_or_create(id=1, defaults={'temperatureSensor': data['temperatureSensor']})
-        if 'motionSensor' in data:
-            Data.objects.update_or_create(id=1, defaults={'motionSensor': data['motionSensor']})
+        # if 'lightSensor' in data:
+        #     Data.objects.update_or_create(id=1, defaults={'lightSensor': data['lightSensor']})
+        # if 'temperatureSensor' in data:
+        #     Data.objects.update_or_create(id=1, defaults={'temperatureSensor': data['temperatureSensor']})
+        # if 'motionSensor' in data:
+        #     Data.objects.update_or_create(id=1, defaults={'motionSensor': data['motionSensor']})
 
         return JsonResponse({"status": "success", "message": "Action performed successfully."})
 
@@ -43,7 +49,7 @@ def perform_action(request):
 
 def get_sensor_data(request):
     data = Data.objects.latest('created_at')
-
+    # print(data.coolerState)
     sensor_data = {
         'lightSensor': data.lightSensor,
         'temperatureSensor': data.temperatureSensor,

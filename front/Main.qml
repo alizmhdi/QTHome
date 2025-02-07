@@ -22,6 +22,8 @@ Window {
     property bool lampState: false
     property bool curtainState: false
     property string coolerState: "Off"
+    property int coolerStateIndex: 0
+
 
     WebSocket {
         id: websocket
@@ -53,6 +55,7 @@ Window {
         }
         if (data.hasOwnProperty("coolerState")) {
             coolerState = data.coolerState
+            coolerStateIndex = ["Off", "Low Speed", "Medium Speed", "High Speed"].indexOf(coolerState)
         }
     }
 
@@ -281,7 +284,10 @@ Window {
                         // Toggle Switch for Lamp
                         Switch {
                             checked: lampState
-                            onCheckedChanged: lampState = checked
+                            onCheckedChanged: {
+                                lampState = checked
+                                sendDataToServer()
+                            }
                         }
                     }
                 }
@@ -320,7 +326,10 @@ Window {
                         // Toggle Switch for Curtain
                         Switch {
                             checked: curtainState
-                            onCheckedChanged: curtainState = checked
+                            onCheckedChanged: {
+                                curtainState = checked
+                                sendDataToServer()
+                            }
                         }
                     }
                 }
@@ -378,7 +387,13 @@ Window {
                                 padding: 10
                             }
 
-                            onCurrentIndexChanged: coolerState = model[currentIndex]
+                            currentIndex: coolerStateIndex
+
+                            onCurrentIndexChanged: {
+                                coolerStateIndex = currentIndex
+                                coolerState = model[currentIndex]
+                                sendDataToServer()
+                            }
                         }
                     }
                 }
@@ -408,7 +423,7 @@ Window {
 
     // Timer to simulate sensor data updates
     Timer {
-        interval: 4000   // Update every 1 second
+        interval: 10000   // Update every 1 second
         running: true
         repeat: true
         onTriggered: {
@@ -422,6 +437,7 @@ Window {
 
             // Simulate Motion Detection Sensor values
             motionSensor = (Math.random() < 0.5) ? "Not Detected" : "Detected";
+            sendDataToServer()
         }
     }
 
@@ -447,7 +463,7 @@ Window {
     function sendDataToServer() {
         // Create a new XMLHttpRequest
         var xhr = new XMLHttpRequest();
-        var url = "http://localhost:8080";  // Replace with your server URL
+        var url = "http://localhost:8000/data/";  // Replace with your server URL
         xhr.open("POST", url);
         xhr.setRequestHeader("Content-Type", "application/json");
 
@@ -460,7 +476,6 @@ Window {
             "curtainState": curtainState ? "Open" : "Closed",
             "coolerState": coolerState
         };
-
         // Send the request with JSON data
         xhr.send(JSON.stringify(data));
 
