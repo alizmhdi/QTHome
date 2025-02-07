@@ -7,7 +7,11 @@ MOUNT_DIR="/mnt/raspios"
 QEMU_STATIC="/usr/bin/qemu-aarch64-static"
 LOCAL_QT_DIR="./Qt"              # Path to the local Qt directory
 IMAGE_QT_DIR="/opt/Qt"           # Path inside the image where Qt will be copied
+LOCAL_QT_APP="./my_qt_app"       # Path to the local Qt application
+IMAGE_QT_APP="/opt/Qt/my_qt_app" # Path inside the image where the Qt app will be copied
 QT_ENV_FILE="/etc/profile.d/qt.sh"  # Environment file for Qt variables
+QT_APP_NAME="my_qt_app"          # Name of your Qt application
+SERVICE_FILE="/etc/systemd/system/${QT_APP_NAME}.service"  # Systemd service file
 
 # List of tools to install
 TOOLS=(
@@ -67,6 +71,19 @@ copy_qt_folder() {
   fi
 }
 
+# Function to copy Qt application to the image
+copy_qt_application() {
+  echo "Copying Qt application from $LOCAL_QT_APP to $IMAGE_QT_APP..."
+  if [ -f "$LOCAL_QT_APP" ]; then
+    mkdir -p "$MOUNT_DIR/$(dirname "$IMAGE_QT_APP")"
+    cp "$LOCAL_QT_APP" "$MOUNT_DIR/$IMAGE_QT_APP"
+    chmod +x "$MOUNT_DIR/$IMAGE_QT_APP"  # Ensure the application is executable
+  else
+    echo "Local Qt application $LOCAL_QT_APP not found. Skipping application copy."
+    exit 1
+  fi
+}
+
 # Function to set Qt environment variables
 set_qt_env() {
   echo "Setting Qt environment variables in $QT_ENV_FILE..."
@@ -78,66 +95,30 @@ EOF
   chmod +x "$MOUNT_DIR/$QT_ENV_FILE"
 }
 
-# Check if running as root
-if [ "$EUID" -ne 0 ]; then
-  echo "Please run as root or use sudo."
-  exit 1
-fi
+# Function to create a systemd service for the Qt application
+create_qt_service() {
+  echo "Creating systemd service for $QT_APP_NAME..."
+  cat <<EOF | sudo tee "$MOUNT_DIR/$SERVICE_FILE" > /dev/null
+[Unit]
+Description=My Qt Application
+After=network.target
 
-# Step 0: Install QEMU on the development machine
-install_qemu
+[Service]
+ExecStart=$IMAGE_QT_APP
+Restart=always
+User=pi
+Environment="QT_HOME=$IMAGE_QT_DIR"
+Environment="CMAKE_PREFIX_PATH=$IMAGE_QT_DIR"
+Environment="PATH=$IMAGE_QT_DIR/bin:\$PATH"
 
-# Step 1: Extract the .img.xz file
-echo "Extracting $IMAGE_XZ..."
-if [ ! -f "$IMAGE" ]; then
-  unxz -k "$IMAGE_XZ"
-else
-  echo "$IMAGE already exists. Skipping extraction."
-fi
-
-# Step 2: Mount the image
-echo "Mounting $IMAGE..."
-LOOP_DEVICE=$(losetup -fP --show "$IMAGE")
-mkdir -p "$MOUNT_DIR"
-mount "${LOOP_DEVICE}p2" "$MOUNT_DIR"
-mount "${LOOP_DEVICE}p1" "$MOUNT_DIR/boot"
-
-# Step 3: Copy QEMU static binary into the image
-echo "Setting up QEMU for ARM64 emulation..."
-if [ ! -f "$QEMU_STATIC" ]; then
-  echo "QEMU static binary not found. Please install qemu-user-static."
-  exit 1
-fi
-cp "$QEMU_STATIC" "$MOUNT_DIR/usr/bin/"
-
-# Step 4: Copy Qt folder to the image
-copy_qt_folder
-
-# Step 5: Set Qt environment variables
-set_qt_env
-
-# Step 6: Chroot into the image and install tools
-echo "Chrooting into the image..."
-chroot "$MOUNT_DIR" qemu-aarch64-static /bin/bash <<EOF
-echo "Inside chroot environment."
-$(declare -f install_tools)
-install_tools
-echo "Exiting chroot environment."
+[Install]
+WantedBy=multi-user.target
 EOF
 
-# Step 7: Unmount the image
-echo "Unmounting the image..."
-umount "$MOUNT_DIR/boot"
-umount "$MOUNT_DIR"
-rmdir "$MOUNT_DIR"
-losetup -d "$LOOP_DEVICE"
+  # Enable the service
+  chroot "$MOUNT_DIR" systemctl enable "$QT_APP_NAME.service"
+}
 
-# Step 8: (Optional) Compress the image back to .img.xz
-echo "Compressing the image back to .img.xz..."
-if [ -f "$IMAGE_XZ" ]; then
-  echo "$IMAGE_XZ already exists. Skipping compression."
-else
-  xz -z "$IMAGE"
-fi
-
-echo "Done! Modified image: $IMAGE_XZ"
+# Check if running as root
+if [ "$EUID" -ne 0 ]; then
+  echo "Please run as root or use
